@@ -1,0 +1,89 @@
+<?php
+
+if(isset($_POST['upload'])){
+	$file_name = $_FILES['file']['name'];
+	$file_type = $_FILES['file']['type'];
+	$file_size = $_FILES['file']['size'];
+	$file_tem_loc = $_FILES['file']['tmp_name'];
+	$file_store= "upload\\$file_name";
+	
+	move_uploaded_file($file_tem_loc, $file_store);	
+
+
+	$myFile = "";
+	$direction = "upload";
+	if(is_dir($direction)){
+		if($dh = opendir($direction)){
+			while (($file = readdir($dh)) !== false){
+				if($file != '.' && $file != '..'){
+					$myFile = $file;
+				}
+			}
+			closedir($dh);
+		}
+	}
+echo $myFile;
+	$file = fopen("upload\\$myFile", "r");
+	$file2 = fopen("upload\\converted.doc", "w");
+
+
+	$kiril = array("А","Ә","Б","В","Г","Ғ","Д","Е","Ё", "Ж","З","И","Й","К","Қ","Л","М","Н","Ң","О","Ө","П","Р","С","Т","У","Ү","Ұ","Ф","Х","Һ","Ц","Ч","Ш",  "Щ",   "Ъ","Ы","І","Ь","Э","Ю", "Я",     "а","ә","б","в","г","ғ","д","е","ё", "ж","з","и","й","к","қ","л","м","н","ң","о","ө","п","р","с","т","у", "ү","ұ","ф","х","һ","ц","ч", "ш", "щ","ъ","ы","і","ь","э","ю", "я");
+	$latin = array("A","Á","B","V","G","Ǵ","D","E","Ó", "J","Z","İ","Y","K","Q","L","M","N","Ń","O","Ó","P","R","S","T","W","Ú","U","F","H","H","S","Ć","Ś",  "ŚŚ",  "", "I","İ","", "E","YU","YA",    "a","á","b","v","g","ǵ","d","e","ó", "j","z","i","y","k","q","l","m","n","ń","o","ó","p","r","s","t","w", "ú","u","f","h","h","s","ć", "ś", "śś",  "", "ı","i","", "e","yu","ya");
+
+
+	$myText = "";
+	//Getting content of file
+	$i = 0;
+	while(! feof($file)) {
+	  $line = fgets($file);
+	  $myText = $myText.$line;
+	  $i++;
+	}
+
+
+	$cyrToLatin = str_replace($kiril, $latin, $myText);
+	fwrite($file2, $cyrToLatin);
+	
+	fclose($file);
+	fclose($file2);
+}
+
+//Download file
+	if(!empty($_GET['file'])){
+		$filename = basename($_GET['file']);
+		$filepath = 'upload/' . $filename;
+		
+		if(!empty($filename) && file_exists($filepath)){
+			//Download converted.txt
+			header("Cache-Control: public");
+			header("Content-Description: FIle Transfer");
+			header("Content-Disposition: attachment; filename=$filename");
+			header("Cache-Type: application/zip");
+			header("Cache-Transfer-Emcoding: binary");
+			
+			readfile($filepath);
+			exit;
+		}else{
+			echo "Dosya bulunamadı";
+		}
+	}
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head> 
+<title>Kiril'den Latine</title>
+</head>
+<body> 
+	<form action = "?" method = "POST" enctype = "multipart/form-data">
+		<label>Dosya Yükle </label>
+		<p><input type="file" name="file"></p>
+		<p><input type="submit" name="upload" value="Dosya Çevir"></p>
+	</form>
+	
+	<h2>Dosya İndir</h2>
+	<a href="test.php?file=converted.doc"> Dosyayı indir</a>
+</body>
+</html>
+ 
