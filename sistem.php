@@ -306,7 +306,7 @@ function getNumberOfLastPage(){
 	}else{
 		$queryRows = mysqli_query($connection, "SELECT * FROM ogrenci;");
 		$rows = mysqli_num_rows($queryRows);
-		$lastPageNumber = ($rows / $pageLimit) - 1;
+		$lastPageNumber = (int)($rows / $pageLimit);
 		return $lastPageNumber;
 	}	
 }
